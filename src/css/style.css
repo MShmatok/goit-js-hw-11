@@ -3,7 +3,7 @@
   --animation-duration: 250ms;
 
   /* Card SET */
-  --ident: 24px;
+  --ident: 15px;
   --items: 4;
 }
 .header {
@@ -11,7 +11,7 @@
   background-color: aqua;
 }
 .container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 /*  Card set */

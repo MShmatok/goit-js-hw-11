@@ -1,24 +1,51 @@
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-const refs = {
-  form: document.querySelector('.search-form'),
-  gallery: document.querySelector('.gallery'),
-  page: 1,
-  query: '',
-}
-const lightBoxParams = { caption: true, captionSelector: 'img', captionType: 'attr', captionsData: 'alt', captionDelay: 250, captionClass: 'center' };
+import { PixabayAPI } from "./js/pixabayAPI";
+import { markupCreate } from './js/markupCreateAPI';
+import { refs } from "./js/refs";
+
+const pixabay = new PixabayAPI();
+
+// LightBox
+const lightBoxParams = {
+  caption: true,
+  captionSelector: 'img',
+  captionType: 'attr',
+  captionsData: 'alt',
+  captionDelay: 250,
+  captionClass: 'center',
+};
 var lightbox = new SimpleLightbox('.gallery a', lightBoxParams);
 
-refs.form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  refs.page = 1;
-  refs.query = e.currentTarget.elements.searchQuery.value;
-  console.dir();
-  fetchSearch(refs.query, refs.page).then(renderImagePost);
-  refs.page += 1;
-})
+refs.form.addEventListener('submit', onSearch);
 
+async function onSearch(e) {
+  e.preventDefault();
+  clear();
+
+  pixabay.query = String(refs.input.value).trim().toLocaleLowerCase();
+  await render();
+}
+
+async function onLoadMore() {
+  if (pixabay.hasNewPages()) {
+    await render();
+  }
+}
+
+async function render() {
+  const markup = markupCreate(await pixabay.getPosts());
+  refs.gallery.insertAdjacentHTML('beforeend', markup);
+
+  pixabay.increaseCurPage();
+  lightbox.refresh();
+
+  const lastCard = document.querySelector(".js-card:last-child");
+  if (lastCard) {
+    infinteObserver.observe(lastCard);
+  }
+}
 
 const infinteObserver = new IntersectionObserver(
   ([entry], observer) => {
@@ -29,91 +56,13 @@ const infinteObserver = new IntersectionObserver(
       // перестаем его отслеживать
       observer.unobserve(entry.target);
       // и загружаем новую порцию контента
-      fetchSearch(refs.query, refs.page++).then(renderImagePost);
+      onLoadMore();
 
     }
   },
   { threshold: 0 }
 );
 
-function fetchSearch(query, page) {
-  const BASE_URL = 'https://pixabay.com/api/';
-  const KEY = '37231533-205413eb498832325c7945ce4';
-
-  // let query = query;
-  // let page = 1;
-  let per_page = 40;
-  let fullUrl = `${BASE_URL}?key=${KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`;
-
-
-  return fetch(fullUrl).then(r => {
-    if (!r.ok) {
-      throw new Error(r.status)
-    }
-    return r.json();
-  });
-}
-
-function search(query, page) {
-  fetchSearch(query, page)
-    .then(resp => {
-      console.log('last');
-      // renderImagePost(resp);
-      console.log('last 2');
-      const lastCard = document.querySelector(".js-card:last-child");
-      console.log(lastCard);
-      if (lastCard) {
-        console.log('last');
-        infinteObserver.observe(lastCard);
-      }
-    }).catch((err) => {
-      console.log(err.status);
-    }
-    )
-}
-
-
-function renderImagePost({ hits }) {
-  const markup = hits.map(({ webformatURL, tags, largeImageURL, likes, views, comments, downloads }) => {
-    return `
-   <div class="photo-card items-set js-card">
-  <a href="${largeImageURL}">
-    <div class="thumb">
-      <img class="img" src="${webformatURL}" alt="${tags}" loading="lazy" />
-    </div>
-     </a>
-    <div class="info">
-      <p class="info-item">
-        <b>Likes</b>
-        ${likes}
-      </p>
-      <p class="info-item">
-        <b>Views</b>
-        ${views}
-      </p>
-      <p class="info-item">
-        <b>Comments</b>
-        ${comments}
-      </p>
-      <p class="info-item">
-        <b>Downloads</b>
-        ${downloads}
-      </p>
-    </div>
- 
-</div>
-`
-      ;
-  }).join('');
-
-  refs.gallery.insertAdjacentHTML('beforeend', markup);
-  lightbox.refresh();
-
-
-  const lastCard = document.querySelector(".js-card:last-child");
-
-  if (lastCard) {
-
-    infinteObserver.observe(lastCard);
-  }
+function clear() {
+  refs.gallery.innerHTML = '';
 }
