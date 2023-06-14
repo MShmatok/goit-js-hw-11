@@ -5,11 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <header class="header">
-      <div class="container">
+      <div class="container container-header">
         <form class="search-form" id="search-form">
           <input
             type="text"
@@ -17,11 +18,15 @@
             autocomplete="off"
             placeholder="Search images..."
           />
-          <button type="submit">Search</button>
+          <button class="btnSearch" type="submit">
+            <svg class="" width="20" height="20">
+              <use href="./img/symbol-defs.svg#icon-search"></use>
+            </svg>
+          </button>
         </form>
       </div>
     </header>
-    <section>
+    <section class="section">
       <div class="container">
         <div class="gallery card-set">
           <!-- Картки зображень -->

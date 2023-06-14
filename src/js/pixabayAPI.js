@@ -8,7 +8,8 @@ class PixabayAPI {
     #query = '';
     #per_page = 40;
     #current_page = 1;
-    #totalPages = 0;
+    #totalPosts = 0;
+    #hasPosts;
 
     async getPosts() {
         const params = {
@@ -21,8 +22,9 @@ class PixabayAPI {
         }
 
         const { data: { hits, totalHits } } = await axios.get(`?key=${KEY}`, { params })
-        this.#totalPages = totalHits;
-
+        this.#totalPosts = totalHits;
+        this.#hasPosts = !(0 === hits.length);
+        console.log(this.#hasPosts);
         return hits;
     }
 
@@ -35,8 +37,8 @@ class PixabayAPI {
 
     }
 
-    get totalPages() {
-        return this.#totalPages;
+    get totalPosts() {
+        return this.#totalPosts;
     }
 
     get query() {
@@ -47,7 +49,10 @@ class PixabayAPI {
         this.#query = newQuery;
     }
     hasNewPages() {
-        return this.#current_page < this.#totalPages / this.#per_page;
+        return this.#current_page < this.#totalPosts / this.#per_page;
+    }
+    hasPosts() {
+        return this.#hasPosts;
     }
 }
 
