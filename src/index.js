@@ -53,16 +53,20 @@ async function onLoadMore() {
 }
 
 async function render() {
-  const markup = markupCreate(await pixabay.getPosts());
-  refs.gallery.insertAdjacentHTML('beforeend', markup);
+  try {
+    const markup = markupCreate(await pixabay.getPosts());
+    refs.gallery.insertAdjacentHTML('beforeend', markup);
 
 
-  pixabay.increaseCurPage();
-  lightbox.refresh();
+    pixabay.increaseCurPage();
+    lightbox.refresh();
 
-  const lastCard = document.querySelector(".js-card:last-child");
-  if (lastCard) {
-    infinteObserver.observe(lastCard);
+    const lastCard = document.querySelector(".js-card:last-child");
+    if (lastCard) {
+      infinteObserver.observe(lastCard);
+    }
+  } catch (error) {
+    Notify.failure(`Something went wrong! (${error.message})`);
   }
 }
 
@@ -81,7 +85,7 @@ const infinteObserver = new IntersectionObserver(
   },
   {
     threshold: 0,
-    rootMargin: '300px',
+    rootMargin: '1000px',
   }
 );
 

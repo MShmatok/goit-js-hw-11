@@ -24,7 +24,7 @@ class PixabayAPI {
         const { data: { hits, totalHits } } = await axios.get(`?key=${KEY}`, { params })
         this.#totalPosts = totalHits;
         this.#hasPosts = !(0 === hits.length);
-        console.log(this.#hasPosts);
+
         return hits;
     }
 
